@@ -14,13 +14,16 @@
           integrity="sha256-46r060N2LrChLLb5zowXQ72/iKKNiw/lAmygmHExk/o="
           crossorigin="anonymous" />
 
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/corner.css">
+    <link rel="stylesheet" href="/static/css/dashboard/main.css">
+    <link rel="stylesheet" href="/static/css/dashboard/corner.css">
     <title>JUST DO IT</title>
 
 </head>
 
 <body onload="startTime()">
+<div class="user">
+    <span class="username" id="username" data-username="{{.username}}">{{.username}}</span>
+</div>
 <div id = "header">
     <div class="flexrow-container">
         <div class="standard-theme theme-selector"></div>
@@ -31,7 +34,7 @@
 </div>
 <div>
     <p><span id="datetime"></span></p>
-    <script src="/static/js/time.js"></script>
+    <script src="/static/js/dashboard/time.js"></script>
 </div>
 
 <div id="form">
@@ -54,6 +57,6 @@
     <div id="myUnOrdList" class="todo-list-wrapper">
         <ul class="todo-list"></ul>
     </div>
-    <script src="/static/js/main.js" type="text/javascript"> </script>
+    <script src="/static/js/dashboard/main.js" type="text/javascript"> </script>
 </body>
 </html>

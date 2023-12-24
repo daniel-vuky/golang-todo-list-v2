@@ -12,7 +12,7 @@ type ItemsRepository struct {
 // Insert method of ItemsRepository
 // @param item
 // @throw error
-func (itemsRepository ItemsRepository) Insert(item model.Item) (int64, error) {
+func (itemsRepository ItemsRepository) Insert(item *model.Item) error {
 	result, err := itemsRepository.Db.Exec(
 		"INSERT INTO items (user_id, title, description, status) values (?, ?, ?, ?)",
 		item.UserId,
@@ -21,19 +21,24 @@ func (itemsRepository ItemsRepository) Insert(item model.Item) (int64, error) {
 		item.Status,
 	)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	lastInsertId, insertErr := result.LastInsertId()
-	return lastInsertId, insertErr
+	if insertErr != nil {
+		return insertErr
+	}
+	item.ItemId = uint64(lastInsertId)
+	return nil
 }
 
 // Find method of ItemsRepository
 // @param id
 // @return item
 // @throw error
-func (itemsRepository ItemsRepository) Find(id int) (model.Item, error) {
+func (itemsRepository ItemsRepository) Find(id int, userID uint64) (model.Item, error) {
 	var item model.Item
-	queryErr := itemsRepository.Db.QueryRow("SELECT * FROM items WHERE item_id = ?", id).Scan(
+	exec := "SELECT * FROM items WHERE item_id = ? and user_id = ?"
+	queryErr := itemsRepository.Db.QueryRow(exec, id, userID).Scan(
 		&item.ItemId,
 		&item.UserId,
 		&item.Title,
@@ -54,9 +59,10 @@ func (itemsRepository ItemsRepository) Find(id int) (model.Item, error) {
 // @param offset
 // @return list item
 // @throw error
-func (itemsRepository ItemsRepository) FindAll(limit, offset int) ([]model.Item, error) {
+func (itemsRepository ItemsRepository) FindAll(limit, offset int, userID uint64) ([]model.Item, error) {
 	items, err := itemsRepository.Db.Query(
-		"SELECT * FROM items order by status, item_id LIMIT ? OFFSET ?",
+		"SELECT * FROM items where user_id = ? order by status, item_id LIMIT ? OFFSET ?",
+		userID,
 		limit,
 		offset,
 	)
@@ -89,7 +95,7 @@ func (itemsRepository ItemsRepository) FindAll(limit, offset int) ([]model.Item,
 // @param item
 // @param itemInput
 // @throw error
-func (itemsRepository ItemsRepository) Update(item model.Item, itemInput model.ItemInput) error {
+func (itemsRepository ItemsRepository) Update(item *model.Item, itemInput *model.ItemInput) error {
 	_, updatedError := itemsRepository.Db.Exec(
 		"UPDATE items set title = ?, description = ?, status = ? WHERE item_id = ?",
 		itemInput.Title,

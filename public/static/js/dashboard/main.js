@@ -1,5 +1,5 @@
 // Selectors
-
+const usernameInput = document.getElementById("username")
 const toDoInput = document.querySelector('.todo-input');
 const toDoBtn = document.querySelector('.todo-btn');
 const toDoList = document.querySelector('.todo-list');
@@ -7,13 +7,16 @@ const standardTheme = document.querySelector('.standard-theme');
 const lightTheme = document.querySelector('.light-theme');
 const darkerTheme = document.querySelector('.darker-theme');
 
-const itemUrl = "http://localhost:8080/items";
+const itemUrl = `${window.location.origin}/items`;
+const logOutUrl = `${window.location.origin}/logout`;
 const STATUS_PROCESSING = 1;
 const STATUS_COMPLETED = 2;
 
 
 // Event Listeners
 
+usernameInput.addEventListener('mouseover', usernameMouseOver);
+usernameInput.addEventListener('mouseout', usernameMouseOut);
 toDoBtn.addEventListener('click', addToDo);
 toDoList.addEventListener('click', todoAction);
 document.addEventListener("DOMContentLoaded", getTodos);
@@ -28,6 +31,22 @@ savedTheme === null ?
     : changeTheme(localStorage.getItem('savedTheme'));
 
 // Functions;
+function usernameMouseOver(event) {
+    usernameInput.innerText = "Sign Out?";
+    usernameInput.style.textDecoration = "underline";
+    usernameInput.style.cursor = "pointer";
+    usernameInput.addEventListener('click', function () {
+        window.location.href = logOutUrl;
+    });
+}
+
+function usernameMouseOut(event) {
+    const item = event.target;
+    usernameInput.innerText = item.getAttribute("data-username");
+    usernameInput.style.textDecoration = "none";
+    usernameInput.style.cursor = "none";
+}
+
 function todoAction(event){
     const item = event.target;
 
@@ -117,7 +136,7 @@ function addToDoElement(item) {
     // newToDo.innerText = "hey";
     newToDo.innerText = item.title;
     newToDo.classList.add('todo-item');
-    newToDo.setAttribute("id", `todo-item-${item.title}`);
+    newToDo.setAttribute("id", `todo-item-${item.item_id}`);
     toDoDiv.appendChild(newToDo);
 
     // check btn;

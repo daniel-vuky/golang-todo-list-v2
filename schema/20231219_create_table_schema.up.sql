@@ -4,8 +4,6 @@ Create TABLE users (
     username varchar(255) not null unique,
     email varchar(255) not null unique,
     password varchar(512) not null,
-    firstname varchar(255) not null,
-    lastname varchar(255),
     created_at datetime DEFAULT CURRENT_TIMESTAMP,
     updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

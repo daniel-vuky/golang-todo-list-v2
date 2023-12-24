@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="/static/css/auth/login.css">
+
+</head>
+<body>
+<body>
+    <section class="container">
+        <div class="login-container">
+            <div class="circle circle-one"></div>
+            <div class="form-container">
+                <img src="/static/image/illustration.png" alt="illustration" class="illustration" />
+                <h1 class="opacity">Sign Up</h1>
+                <form method="post" action="/register">
+                    <input type="text" name="username" placeholder="USERNAME" required />
+                    <input type="email" name="email" placeholder="EMAIL" />
+                    <input type="password" name="password" placeholder="PASSWORD" minlength="6" required />
+                    <button class="opacity">Get Go</button>
+                </form>
+                <div class="register-forget opacity">
+                    <a href="/login">Login</a>
+                </div>
+            </div>
+            <div class="circle circle-two"></div>
+        </div>
+        <div class="theme-btn-container"></div>
+    </section>
+</body>
+<!-- partial -->
+<script src="/static/js/auth/login.js"></script>
+
+</body>
+</html>
