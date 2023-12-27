@@ -79,6 +79,11 @@ h1 {
     -o-border-radius: 5px;
 }
 
+.error-message {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
 .login-container form input:focus {
     box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.2);
     animation: wobble 0.3s ease-in;

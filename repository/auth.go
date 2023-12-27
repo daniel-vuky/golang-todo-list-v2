@@ -2,11 +2,24 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/daniel-vuky/golang-todo-list-and-chat/auth"
-	"github.com/daniel-vuky/golang-todo-list-and-chat/model"
+	"github.com/daniel-vuky/golang-todo-list-v2/auth"
+	"github.com/daniel-vuky/golang-todo-list-v2/model"
 	jwtGo "github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+const MissingInputErrorCode int = 1
+const MissingInputError string = "Please fill all the information input"
+const InputErrorCode int = 2
+const InputError string = "Please check the input"
+const UserExistedErrorCode int = 3
+const UserExistedError string = "An account with this username or email was existed"
+const UsernamePasswordErrorCode int = 4
+const UsernamePasswordError string = "Username or Password is not correct"
+const CreateUserErrorCode int = 5
+const CreateUserError string = "Fail to create new user, %s"
+const ErrorEncounteredErrorCode int = 6
+const ErrorEncounteredError = "An error encountered white performing operations"
 
 type AuthRepository struct {
 	Db *sql.DB
@@ -50,4 +63,21 @@ func (authRepository AuthRepository) GetUsernameFromToken(token string) (string,
 // GetUserIDFromToken Parse the token
 func (authRepository AuthRepository) GetUserIDFromToken(token string) (uint64, error) {
 	return auth.GetUserIDFromToken(token)
+}
+
+// GetErrorMessageByCode Get error message by code
+func (authRepository AuthRepository) GetErrorMessageByCode(code int) string {
+	mappingError := map[int]string{
+		MissingInputErrorCode:     MissingInputError,
+		InputErrorCode:            InputError,
+		UserExistedErrorCode:      UserExistedError,
+		UsernamePasswordErrorCode: UsernamePasswordError,
+		CreateUserErrorCode:       CreateUserError,
+		ErrorEncounteredErrorCode: ErrorEncounteredError,
+	}
+	errorMessage, existed := mappingError[code]
+	if !existed {
+		return ErrorEncounteredError
+	}
+	return errorMessage
 }

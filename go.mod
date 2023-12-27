@@ -1,4 +1,4 @@
-module github.com/daniel-vuky/golang-todo-list-and-chat
+module github.com/daniel-vuky/golang-todo-list-v2
 
 go 1.21.4
 

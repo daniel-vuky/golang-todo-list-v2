@@ -1,25 +1,27 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
-	"github.com/daniel-vuky/golang-todo-list-and-chat/model"
-	"github.com/daniel-vuky/golang-todo-list-and-chat/repository"
+	"github.com/daniel-vuky/golang-todo-list-v2/model"
+	"github.com/daniel-vuky/golang-todo-list-v2/repository"
 	"github.com/gin-gonic/gin"
 	ginSession "github.com/go-session/gin-session"
 	"net/http"
 	"strconv"
 )
 
-const DEFAULT_SIZE = 100
-const DEFAULT_PAGE = 1
+const DefaultSize int = 100
+const DefaultPage int = 1
 
-const MISSING_INPUT_ID = "Please enter ID"
-const BIND_INPUT_ERR = "Can not bind the input params"
-const CREATE_ITEM_ERR = "Can not create to do item, %s"
-const UPDATE_ITEM_ERR = "Can not update item, %s"
-const DELETE_ITEM_ERR = "Can not delete item, %s"
-const FIND_ALL_ITEM_ERR = "Can not get the list items, %s"
-const FIND_ITEM_ERR = "Can not find the item with ID, %d, %s"
+const SessionError string = "you need to login first"
+const MissingInputID string = "please enter ID"
+const BindInputError string = "can not bind the input params"
+const CreateItemError string = "can not create to do item, %s"
+const UpdateItemError string = "can not update item, %s"
+const DeleteItemError string = "can not delete item, %s"
+const FindAllItemError string = "can not get the list items, %s"
+const FindItemError string = "can not find the item with ID, %d, %s"
 
 type Items struct {
 	Repository *repository.ItemsRepository
@@ -30,13 +32,13 @@ func (items Items) Create(c *gin.Context) {
 	var itemInput model.ItemInput
 	bindErr := c.ShouldBindJSON(&itemInput)
 	if bindErr != nil || len(itemInput.Title) == 0 || itemInput.Status == 0 {
-		WriteResult(http.StatusBadRequest, BIND_INPUT_ERR, c)
+		c.AbortWithError(http.StatusBadRequest, errors.New(BindInputError))
 		return
 	}
 	session := ginSession.FromContext(c)
 	userID, userIDExisted := session.Get("user_id")
 	if !userIDExisted {
-		c.AbortWithError(http.StatusForbidden, fmt.Errorf("you need to login first"))
+		c.AbortWithError(http.StatusForbidden, errors.New(SessionError))
 		return
 	}
 	newItem := model.Item{
@@ -47,7 +49,7 @@ func (items Items) Create(c *gin.Context) {
 	}
 	insertErr := items.Repository.Insert(&newItem)
 	if insertErr != nil {
-		WriteResult(http.StatusInternalServerError, fmt.Sprintf(CREATE_ITEM_ERR, insertErr.Error()), c)
+		c.AbortWithError(http.StatusInternalServerError, errors.New(CreateItemError))
 		return
 	}
 	WriteResultWithItem(http.StatusOK, newItem, c)
@@ -57,16 +59,16 @@ func (items Items) Create(c *gin.Context) {
 func (items Items) List(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("size"))
 	if pageSize == 0 {
-		pageSize = DEFAULT_SIZE
+		pageSize = DefaultSize
 	}
 	currentPage, _ := strconv.Atoi(c.Query("p"))
 	if currentPage == 0 {
-		currentPage = DEFAULT_PAGE
+		currentPage = DefaultPage
 	}
 	session := ginSession.FromContext(c)
 	userID, userIDExisted := session.Get("user_id")
 	if !userIDExisted {
-		c.AbortWithError(http.StatusForbidden, fmt.Errorf("you need to login first"))
+		c.AbortWithError(http.StatusForbidden, errors.New(SessionError))
 		return
 	}
 	listItems, findAllErr := items.Repository.FindAll(
@@ -75,7 +77,7 @@ func (items Items) List(c *gin.Context) {
 		userID.(uint64),
 	)
 	if findAllErr != nil {
-		WriteResult(http.StatusInternalServerError, fmt.Sprintf(FIND_ALL_ITEM_ERR, findAllErr.Error()), c)
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(FindAllItemError, findAllErr.Error()))
 		return
 	}
 	WriteResultWithListItems(http.StatusOK, listItems, c)
@@ -85,18 +87,18 @@ func (items Items) List(c *gin.Context) {
 func (items Items) GetByID(c *gin.Context) {
 	itemId, itemIdErr := strconv.Atoi(c.Param("id"))
 	if itemIdErr != nil || itemId == 0 {
-		WriteResult(http.StatusBadRequest, MISSING_INPUT_ID, c)
+		c.AbortWithError(http.StatusBadRequest, errors.New(MissingInputID))
 		return
 	}
 	session := ginSession.FromContext(c)
 	userID, userIDExisted := session.Get("user_id")
 	if !userIDExisted {
-		c.AbortWithError(http.StatusForbidden, fmt.Errorf("you need to login first"))
+		c.AbortWithError(http.StatusForbidden, errors.New(SessionError))
 		return
 	}
 	item, findItemErr := items.Repository.Find(itemId, userID.(uint64))
 	if findItemErr != nil || item.ItemId == 0 {
-		WriteResult(http.StatusInternalServerError, fmt.Sprintf(FIND_ITEM_ERR, itemId, findItemErr.Error()), c)
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(FindItemError, itemId, findItemErr.Error()))
 		return
 	}
 	WriteResultWithItem(http.StatusOK, item, c)
@@ -106,28 +108,28 @@ func (items Items) GetByID(c *gin.Context) {
 func (items Items) UpdateByID(c *gin.Context) {
 	itemId, itemIdErr := strconv.Atoi(c.Param("id"))
 	if itemIdErr != nil || itemId == 0 {
-		WriteResult(http.StatusBadRequest, MISSING_INPUT_ID, c)
+		c.AbortWithError(http.StatusBadRequest, errors.New(MissingInputID))
 		return
 	}
 	var itemInput model.ItemInput
 	bindErr := c.ShouldBindJSON(&itemInput)
 	if bindErr != nil || len(itemInput.Title) == 0 || itemInput.Status == 0 {
-		WriteResult(http.StatusBadRequest, BIND_INPUT_ERR, c)
+		c.AbortWithError(http.StatusBadRequest, errors.New(BindInputError))
 		return
 	}
 	session := ginSession.FromContext(c)
 	userID, userIDExisted := session.Get("user_id")
 	if !userIDExisted {
-		c.AbortWithError(http.StatusForbidden, fmt.Errorf("you need to login first"))
+		c.AbortWithError(http.StatusForbidden, errors.New(SessionError))
 		return
 	}
 	item, findItemErr := items.Repository.Find(itemId, userID.(uint64))
 	if findItemErr != nil || item.ItemId == 0 {
-		WriteResult(http.StatusInternalServerError, fmt.Sprintf(FIND_ITEM_ERR, itemId, findItemErr.Error()), c)
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(FindItemError, itemId, findItemErr.Error()))
 		return
 	}
 	if updatedErr := items.Repository.Update(&item, &itemInput); updatedErr != nil {
-		WriteResult(http.StatusInternalServerError, fmt.Sprintf(UPDATE_ITEM_ERR, updatedErr.Error()), c)
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(UpdateItemError, updatedErr.Error()))
 		return
 	}
 	WriteResult(http.StatusOK, "Updated", c)
@@ -137,26 +139,22 @@ func (items Items) UpdateByID(c *gin.Context) {
 func (items Items) DeleteByID(c *gin.Context) {
 	itemId, itemIdErr := strconv.Atoi(c.Param("id"))
 	if itemIdErr != nil || itemId == 0 {
-		WriteResult(http.StatusBadRequest, MISSING_INPUT_ID, c)
+		c.AbortWithError(http.StatusBadRequest, errors.New(MissingInputID))
 		return
 	}
 	session := ginSession.FromContext(c)
 	userID, userIDExisted := session.Get("user_id")
 	if !userIDExisted {
-		c.AbortWithError(http.StatusForbidden, fmt.Errorf("you need to login first"))
+		c.AbortWithError(http.StatusForbidden, errors.New(SessionError))
 		return
 	}
 	item, findItemErr := items.Repository.Find(itemId, userID.(uint64))
 	if findItemErr != nil || item.ItemId == 0 {
-		WriteResult(http.StatusInternalServerError, fmt.Sprintf(FIND_ITEM_ERR, itemId, findItemErr.Error()), c)
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(FindItemError, itemId, findItemErr.Error()))
 		return
 	}
 	if deletedErr := items.Repository.Delete(itemId); deletedErr != nil {
-		WriteResult(
-			http.StatusInternalServerError,
-			fmt.Sprintf(DELETE_ITEM_ERR, deletedErr.Error()),
-			c,
-		)
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(DeleteItemError, deletedErr.Error()))
 		return
 	}
 	WriteResult(http.StatusOK, "Deleted record", c)

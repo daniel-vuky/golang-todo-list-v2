@@ -1,11 +1,12 @@
 package application
 
 import (
-	"github.com/daniel-vuky/golang-todo-list-and-chat/handler"
-	"github.com/daniel-vuky/golang-todo-list-and-chat/repository"
+	"github.com/daniel-vuky/golang-todo-list-v2/handler"
+	"github.com/daniel-vuky/golang-todo-list-v2/repository"
 	"github.com/gin-gonic/gin"
 	ginSession "github.com/go-session/gin-session"
 	"net/http"
+	"strconv"
 )
 
 // LoadRoutes load all the routes of application
@@ -40,7 +41,13 @@ func LoadAuthRoutes(app *App, router *gin.Engine, usersHandler *handler.Users) {
 		c.HTML(http.StatusOK, "index.html", gin.H{"username": username})
 	})
 	router.GET("/login", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "login.html", gin.H{})
+		errorCode, _ := strconv.Atoi(c.Query("error"))
+		param := gin.H{}
+		if errorCode > 0 {
+			errorMessage := usersHandler.Auth.GetErrorMessageByCode(errorCode)
+			param = gin.H{"error": errorMessage}
+		}
+		c.HTML(http.StatusOK, "login.html", param)
 	})
 	router.GET("/register", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "register.html", gin.H{})

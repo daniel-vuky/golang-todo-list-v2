@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/daniel-vuky/golang-todo-list-and-chat/model"
+	"github.com/daniel-vuky/golang-todo-list-v2/model"
 )
 
 type ItemsRepository struct {

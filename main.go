@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/daniel-vuky/golang-todo-list-and-chat/application"
+	"github.com/daniel-vuky/golang-todo-list-v2/application"
 	"github.com/joho/godotenv"
 	"log"
 	"os"

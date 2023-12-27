@@ -15,8 +15,9 @@
                 <img src="/static/image/illustration.png" alt="illustration" class="illustration" />
                 <h1 class="opacity">Sign In</h1>
                 <form method="POST" action="/login">
-                    <input type="text" name="username" placeholder="USERNAME" />
-                    <input type="password" name="password" minlength="6" placeholder="PASSWORD" />
+                    <input type="text" name="username" placeholder="USERNAME" required />
+                    <input type="password" name="password" minlength="6" placeholder="PASSWORD" required />
+                    <div class="error-message">{{.error}}</div>
                     <button class="opacity">Get Go</button>
                 </form>
                 <div class="register-forget opacity">

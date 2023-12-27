@@ -50,4 +50,9 @@ const displayThemeButtons = () => {
     });
 };
 
+window.addEventListener('beforeunload', function (event) {
+    window.location.href = window.location.origin + "/login";
+    return true;
+});
+
 displayThemeButtons();
